@@ -64,6 +64,6 @@ class Parser:
           is_processing_user_code = True
         else:
           is_processing_user_code = False
-        instructions.append(line)
+        instructions.append(line.replace('\n', '\\l'))
       line = trace_file.readline()
     return basic_blocks
