@@ -4,7 +4,8 @@ class Renderer:
   @classmethod
   def render_graph(cls, original_bbs, output_path):
     basic_blocks = cls.non_user_code_reduction(original_bbs)
-    G=pgv.AGraph(directed=True)
+    print(str(len(basic_blocks)))
+    G=pgv.AGraph(directed=True, fontname='Arial')
     G.node_attr['shape'] = 'box'
     bbs = [bb.instructions_str() for bb in basic_blocks]
     G.add_nodes_from(bbs)
@@ -23,7 +24,7 @@ class Renderer:
     print('start layout')
     G.layout(prog='dot')
     print('finished layout\nstart draw')
-    G.draw('graph.png')
+    G.draw(output_path)
     print('finished')
 
   @classmethod
@@ -38,10 +39,15 @@ class Renderer:
           tmp_bb.instructions = cls.reduce_instructions(tmp_bb.instructions)
           user_code_bbs.append(tmp_bb)
         user_code_bbs.append(bb)
+      else:
+        if prev_bb != None and prev_bb.is_user_code:
+          tmp_bb = bb
+          tmp_bb.instructions = cls.reduce_instructions(tmp_bb.instructions)
+          user_code_bbs.append(tmp_bb)
       prev_bb = bb
     return user_code_bbs
 
   @classmethod
-  def reduce_instructions(instructions):
+  def reduce_instructions(cls, instructions):
     return instructions[0].split()[0] + '\\l...\\l' + instructions[-1].split()[0]
 
