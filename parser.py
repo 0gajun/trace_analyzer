@@ -1,14 +1,15 @@
 import subprocess
 from model.basic_block import BasicBlock
 
+# Parse trace result, split to basic blocks
 class Parser:
   @classmethod
   def parse(cls, target_binary_path, trace_file_path):
-    conditions = cls.prepare_user_code_conditions(target_binary_path)
+    conditions = cls.prepare_program_code_conditions(target_binary_path)
     return cls.parse_raw_trace_to_basic_blocks(trace_file_path, conditions)
 
   @classmethod
-  def is_user_code(cls, hex_addr, conditions):
+  def is_program_code(cls, hex_addr, conditions):
     for cond in conditions:
       if cond['min'] <= hex_addr and hex_addr <= cond['max']:
         return True
@@ -22,7 +23,7 @@ class Parser:
     return subprocess.check_output(command, shell = True, universal_newlines=True).split('\n')
 
   @classmethod
-  def prepare_user_code_conditions(cls, target):
+  def prepare_program_code_conditions(cls, target):
     conditions = []
     segment_addr_array = cls.get_raw_segment_addresses(target)
     for segment_addr in segment_addr_array:
@@ -40,14 +41,14 @@ class Parser:
     return int(line.split(':')[0], 16)
 
   @classmethod
-  def gen_basic_block(cls, _id, instructions, is_user_code):
-    return BasicBlock(_id, instructions, is_user_code)
+  def gen_basic_block(cls, _id, instructions, is_program_code):
+    return BasicBlock(_id, instructions, is_program_code)
 
   @classmethod
   def parse_raw_trace_to_basic_blocks(cls, trace_file_path, conditions):
     trace_file = open(trace_file_path, 'r')
     basic_block_id = 0
-    is_processing_user_code = False
+    is_processing_program_code = False
     basic_blocks = []
     instructions = []
     
@@ -56,14 +57,11 @@ class Parser:
       addr = cls.get_insn_addr_from_trace_line(line)
       if addr == -1:
         if instructions:
-          basic_blocks.append(cls.gen_basic_block(basic_block_id, instructions, is_processing_user_code))
+          basic_blocks.append(cls.gen_basic_block(basic_block_id, instructions, is_processing_program_code))
           basic_block_id = basic_block_id + 1
           instructions = []
       else:
-        if cls.is_user_code(addr, conditions):
-          is_processing_user_code = True
-        else:
-          is_processing_user_code = False
+        is_processing_program_code = cls.is_program_code(addr, conditions) 
         instructions.append(line.replace('\n', '\\l'))
       line = trace_file.readline()
     return basic_blocks
