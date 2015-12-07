@@ -1,6 +1,8 @@
 import hashlib
 
 class BasicBlock:
+  __slots__=['_id', 'instructions', 'next_bbs', 'prev_bbs', 'is_program_code', 'key']
+
   def __init__(self, _id, instructions, is_program_code):
     self._id = _id
     self.instructions = instructions
