@@ -23,6 +23,8 @@ def main():
   # chain basic blocks according to traced control flow
   analysis_result = FlowAnalyzer(basic_blocks).analyze()
 
+  del basic_blocks
+
   # Render graph
   Renderer.render(analysis_result.basic_blocks, analysis_result.first_block, output_file_path)
 
