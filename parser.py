@@ -64,4 +64,6 @@ class Parser:
         is_processing_program_code = cls.is_program_code(addr, conditions) 
         instructions.append(line.replace('\n', '\\l'))
       line = trace_file.readline()
+
+    trace_file.close()
     return basic_blocks
