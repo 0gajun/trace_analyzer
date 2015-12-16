@@ -54,5 +54,5 @@ class FlowAnalyzer:
     self.bbs = reduced
 
   def create_reduced_block(self, start_bb, end_bb, reduction_count):
-    reduced_insns = start_bb.instructions[0] + '\\l...\\lreduction_count: ' + str(reduction_count) + '\\l...\\l' + end_bb.instructions[0]
+    reduced_insns = start_bb.instructions[0] + '\\l...\\lreduction_count: ' + str(reduction_count) + '\\l...\\l' + end_bb.instructions[len(end_bb.instructions) - 1]
     return BasicBlock(0, [reduced_insns], False)
