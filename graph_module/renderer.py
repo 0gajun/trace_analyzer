@@ -1,6 +1,8 @@
 import pygraphviz as pgv
 
 class Renderer:
+  TEMP_DOT_FILE='./tmp/tmp.dot'
+
   @classmethod
   def render_graph(cls, original_bbs, output_path):
     basic_blocks = cls.non_program_code_reduction(original_bbs)
@@ -47,6 +49,7 @@ class Renderer:
 
     print('start layout')
     G.layout(prog='dot')
+    G.write(Renderer.TEMP_DOT_FILE)
     print('finished layout\nstart draw')
     G.draw(output_file_path)
     print('finished')
