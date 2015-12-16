@@ -20,9 +20,12 @@ def main():
   # Parse logfile and split into basic block objects
   #basic_blocks = Parser.parse(target_binary_path, trace_file_path)
   basic_blocks = WinParser.parse(target_binary_path, trace_file_path)
+  print("basic_blocks: " + str(len(basic_blocks)))
   # chain basic blocks according to traced control flow
   analysis_result = FlowAnalyzer(basic_blocks).analyze()
+  print("analysis_result: " + str(len(analysis_result.basic_blocks)))
 
+  # delete unused references
   del basic_blocks
 
   # Render graph
