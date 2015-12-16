@@ -32,26 +32,40 @@ class FlowAnalyzer:
   # reduce non program code basic blocks to one basic block
   def reduce_non_program_code(self):
     reduced = []
-    processing_non_program_code = False
-    start_bb = None
-    reduction_bb_count = 0
-    prev_bb = None
-    for bb in self.bbs:
-      if bb.is_program_code:
-        if processing_non_program_code:
-          reduced.append(self.create_reduced_block(start_bb, prev_bb, reduction_bb_count))
-          processing_non_program_code = False
-          start_bb = None
-          reduction_bb_count = 0
-        reduced.append(bb)
+    i = 0
+
+    while i < len(self.bbs):
+      start_index = i
+      start_bb = self.bbs[i]
+      # 連続するブロックの個数を取得
+      count = self.get_block_count(start_bb.is_program_code, start_index)
+
+      if start_bb.is_program_code:
+        reduced.extend(self.bbs[start_index:start_index + count])
       else:
-        # Non Program code
-        if not processing_non_program_code:
-          start_bb = bb
-          processing_non_program_code = True
-      prev_bb = bb
-      reduction_bb_count = reduction_bb_count + 1
+        last_bb = self.bbs[start_index + count - 1]
+        reduced.append(self.create_reduced_block(start_bb, last_bb, count))
+
+      i = i + count
+
     self.bbs = reduced
+
+  # is_program_codeと一致するstart_indexから始まる連続するブロックの数を返す
+  def get_block_count(self, is_program_code, start_index):
+    i = start_index
+    while i < len(self.bbs):
+      bb = self.bbs[i]
+
+      # 引数のblock種別と変わったら連続でないと判断しbreak
+      # 今回のループのブロックは含めないため i - 1する
+      if bb.is_program_code != is_program_code:
+        i = i - 1
+        break
+      # 最終ブロックであればbreak
+      if self.bbs[-1] == bb:
+        break
+      i = i + 1
+    return i - start_index + 1
 
   def create_reduced_block(self, start_bb, end_bb, reduction_count):
     reduced_insns = start_bb.instructions[0] + '\\l...\\lreduction_count: ' + str(reduction_count) + '\\l...\\l' + end_bb.instructions[len(end_bb.instructions) - 1]
